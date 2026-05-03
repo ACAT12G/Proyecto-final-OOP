@@ -6,7 +6,6 @@ import os
 import copy 
 from dotenv import load_dotenv
 
-# Cargar las variables del archivo .env
 load_dotenv()
 
 ctk.set_appearance_mode("dark") 
@@ -109,17 +108,13 @@ class AplicacionChatbot:
         self.root.geometry("900x650")
         self.pantalla_actual_usuario = "Login"
         
-        # Color Base Profundo
         self.root.configure(fg_color="#030a21")
 
         llave = os.getenv("SINOX_API_KEY")
         
-        # ==========================================
-        # EL ESCUDO DE SEGURIDAD (FIX PANTALLA BLANCA)
-        # ==========================================
         if not llave:
             print("⚠️ ALERTA: No se encontró el archivo .env o la variable SINOX_API_KEY. Usando modo de emergencia.")
-            llave = "LLAVE_NO_ENCONTRADA_O_INVALIDA" # Esto evita que Python colapse.
+            llave = "LLAVE_NO_ENCONTRADA_O_INVALIDA" 
             
         self.client = OpenAI(
             base_url="https://api.meganova.ai/v1",
@@ -141,7 +136,6 @@ class AplicacionChatbot:
             print(f"Atención: No se encontraron las imágenes de Sinox. Usando emojis. Detalle: {e}")
             self.img_sinox_pasiva = None
             self.img_sinox_activa = None
-        # =========================================================
 
         self.chat_history = []
         self.frame_actual = None
@@ -218,14 +212,12 @@ class AplicacionChatbot:
                                  font=ctk.CTkFont(weight="bold"), command=self.editar_mensaje)
         btn_edit.pack(side=tk.RIGHT, padx=5)
         
-        # --- Área de la Mascota ---
         if self.img_sinox_pasiva:
             self.mascota_label = ctk.CTkLabel(frame_chat, text="", image=self.img_sinox_pasiva)
         else:
             self.mascota_label = ctk.CTkLabel(frame_chat, text="😐", font=ctk.CTkFont(size=50))
         self.mascota_label.pack(pady=5)
         
-        # --- Visor de Chat ---
         self.chat_display = ctk.CTkTextbox(frame_chat, font=ctk.CTkFont(size=14), 
                                            fg_color="#042b62", text_color="white", 
                                            corner_radius=10, border_width=2, border_color="#5f8ebd")
@@ -236,7 +228,6 @@ class AplicacionChatbot:
         self.chat_display.tag_config("text_body", foreground="white")
         self.chat_display.tag_config("error", foreground="#ff6b6b")
         
-        # --- Área de entrada y envío ---
         input_frame = ctk.CTkFrame(frame_chat, fg_color="transparent")
         input_frame.pack(fill=tk.X, pady=5)
         
@@ -310,7 +301,6 @@ class AplicacionChatbot:
         try:
             self._mascota_hablando()
             
-            # EL TRUCO MAESTRO LIMPIO (Sin código duplicado)
             historial_con_contexto = copy.deepcopy(self.chat_history)
             mensaje_gps = f"\n\n[INFO INTERNA DEL SISTEMA: El usuario está viendo la pantalla '{self.pantalla_actual_usuario}'. Basa tu respuesta en esta pantalla.]"
             historial_con_contexto[-1]["content"] += mensaje_gps
@@ -339,7 +329,6 @@ class AplicacionChatbot:
             self.chat_history.append({"role": "assistant", "content": ai_response})
             
         except Exception as e:
-            # Si el .env falló, este error te lo dirá claramente en el chat de la IA
             self.chat_display.insert(tk.END, f"[Error de conexión con OpenAI: {e}]\n\n", "error")
             self.chat_history.pop()
             
