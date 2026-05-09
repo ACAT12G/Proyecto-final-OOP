@@ -225,6 +225,14 @@ def mostrar_pantalla_login(v):
 
 def iniciar():
     v = ctk.CTk(); v.title("Bank System"); v.configure(fg_color=COLOR_FONDO_PRINCIPAL)
+    
+    # Manejador para cerrar la ventana sin errores de "bgerror"
+    def al_cerrar():
+        v.quit()
+        v.destroy()
+        
+    v.protocol("WM_DELETE_WINDOW", al_cerrar)
+    
     mostrar_pantalla_login(v); v.mainloop()
 
 if __name__ == "__main__": iniciar()
