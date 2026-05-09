@@ -43,8 +43,15 @@ class Reg_Clientes:
         db = DatabaseConnection().client
         if not db: return pd.DataFrame()
         try:
-            response = db.table("clientes").select("*").execute()
-            return pd.DataFrame(response.data)
+            all_data = []
+            offset, limit = 0, 1000
+            while True:
+                response = db.table("clientes").select("*").range(offset, offset + limit - 1).execute()
+                if not response.data: break
+                all_data.extend(response.data)
+                if len(response.data) < limit: break
+                offset += limit
+            return pd.DataFrame(all_data)
         except Exception: return pd.DataFrame()
 
     @staticmethod
@@ -94,9 +101,16 @@ class Gestion_Creditos:
         db = DatabaseConnection().client
         if not db: return pd.DataFrame()
         try:
-            response = db.table("creditos").select("*, clientes(nombre)").execute()
+            all_data = []
+            offset, limit = 0, 1000
+            while True:
+                response = db.table("creditos").select("*, clientes(nombre)").range(offset, offset + limit - 1).execute()
+                if not response.data: break
+                all_data.extend(response.data)
+                if len(response.data) < limit: break
+                offset += limit
             data = []
-            for item in response.data:
+            for item in all_data:
                 row = item.copy()
                 row['nombre_cliente'] = item['clientes']['nombre'] if item.get('clientes') else 'N/A'
                 del row['clientes']
@@ -184,8 +198,15 @@ class Analisis_Datos:
         db = DatabaseConnection().client
         if df_clientes.empty or not db: return None
         try:
-            res_creditos = db.table("creditos").select("*").execute()
-            df_creditos = pd.DataFrame(res_creditos.data)
+            all_creditos = []
+            offset, limit = 0, 1000
+            while True:
+                res = db.table("creditos").select("*").range(offset, offset + limit - 1).execute()
+                if not res.data: break
+                all_creditos.extend(res.data)
+                if len(res.data) < limit: break
+                offset += limit
+            df_creditos = pd.DataFrame(all_creditos)
             if df_creditos.empty: return None
             df_completo = pd.merge(df_clientes, df_creditos, left_on='id', right_on='cliente_id')
             fig = plt.figure(figsize=(6, 4))
